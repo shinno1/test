@@ -1,0 +1,402 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 맵퍼파일 생성 후 반드시 sql-map-config.xml 파일에 mapper 등록해줘야 함 -->
+
+	
+	<mapper namespace="goodsMapper">
+	<resultMap type="com.spring.biz.vo.GoodsVO" id="goods">
+		<result column="GOODS_ID" 				property="goodsId"/>
+		<result column="GOODS_NAME" 			property="goodsName"/>
+		<result column="CATEGORY_CODE" 			property="categoryCode"/>
+		<result column="GOODS_WRITER" 			property="goodsWriter"/>
+		<result column="GOODS_PRICE" 			property="goodsPrice"/>
+		<result column="GOODS_POINT" 			property="goodsPoint"/>
+		<result column="GOODS_DELIVERY_PRICE" 	property="goodsDeliveryPrice"/>
+		<result column="GOODS_PUBLISHER" 		property="goodsPublisher"/>
+		<result column="GOODS_PUBLISHER_DATE" 	property="goodsPublisherDate"/>
+		<result column="GOODS_STATUS" 			property="goodsStatus"/>
+		<result column="GOODS_CONTENT" 			property="goodsContent"/>
+		<result column="GOODS_CREATE_DATE" 		property="goodsCreateDate"/>
+		<result column="FILE_NAME" 				property="fileName"/>
+	</resultMap>
+	
+	<resultMap type="com.spring.biz.vo.CategoryVO" id="category">
+		<result column="CATEGORY_CODE" 			property="categoryCode"/>
+		<result column="CATEGORY_NAME" 			property="categoryName"/>
+	</resultMap>
+	
+	<resultMap type="com.spring.biz.vo.ImageVO" id="image">
+		<result column="IMAGE_ID" 				property="imageId"/>
+		<result column="GOODS_ID" 				property="goodsId"/>
+		<result column="FILE_NAME" 				property="fileName"/>
+		<result column="MEMBER_ID" 				property="memberId"/>
+		<result column="CREATE_DATE" 			property="createDate"/>
+	</resultMap>
+	
+	<resultMap type="com.spring.biz.vo.BuyVO" id="buy">
+		<result column="ORDER_NUM" 				property="orderNum"/>
+		<result column="ORDER_ID" 				property="orderId"/>
+		<result column="MEMBER_ID" 				property="memberId"/>
+		<result column="MEMBER_NAME" 			property="memberName"/>
+		<result column="GOODS_ID" 				property="goodsId"/>
+		<result column="GOODS_NAME" 			property="goodsName"/>
+		<result column="ORDER_GOODS_CNT" 		property="orderGoodsCnt"/>
+		<result column="ORDER_PRICE" 			property="orderPrice"/>
+		<result column="MEMBER_TEL1" 			property="memberTel1"/>
+		<result column="MEMBER_TEL2" 			property="memberTel2"/>
+		<result column="MEMBER_ADDR" 			property="memberAddr"/>
+		<result column="BUY_DATE" 				property="buyDate"/>
+		<result column="IS_CONFIRM" 			property="isConfirm"/>
+	</resultMap>
+	
+	<resultMap type="com.spring.biz.vo.CartVO" id="cart">
+		<result column="CART_ID"			property="cartId"/>
+		<result column="GOODS_ID" 			property="goodsId"/>
+		<result column="MEMBER_ID" 			property="memberId"/>
+		<result column="CREATE_DATE" 		property="createDate"/>
+		<result column="GOODS_CNT" 			property="goodsCnt"/>
+		<result column="IS_DELETE" 			property="isDelete"/>
+	</resultMap>
+	
+	<resultMap type="com.spring.biz.vo.CartListVO" id="cartList">
+		<result column="CART_ID"				property="cartId"/>
+		<result column="FILE_NAME"				property="fileName"/>
+		<result column="GOODS_NAME" 			property="goodsName"/>
+		<result column="MEMBER_ID" 				property="memberId"/>
+		<result column="MEMBER_NAME" 			property="memberName"/>
+		<result column="CREATE_DATE" 			property="createDate"/>
+		<result column="GOODS_PRICE" 			property="goodsPrice"/>
+		<result column="GOODS_CNT" 				property="goodsCnt"/>
+		<result column="GOODS_POINT" 			property="goodsPoint"/>
+		<result column="GOODS_DELIVERY_PRICE" 	property="goodsDeliveryPrice"/>
+		<result column="TOTAL_PRICE" 			property="totalPrice"/>
+		<result column="GOODS_ID" 				property="goodsId"/>
+	</resultMap>
+	
+	<resultMap type="com.spring.biz.vo.SalesVO" id="sales">
+		<result column="BUY_MONTH" 				property="buyMonth"/>
+		<result column="SALES_PER_MONTH" 		property="salesPerMonth"/>
+		<result column="SALES_PER_YEAR" 		property="salesPerYear"/>
+		<result column="BUY_DAY" 				property="buyDay"/>
+		<result column="SALES_PER_DAY" 			property="salesPerDay"/>
+	</resultMap>
+
+	<select id="selectCategoryList" resultMap="category">
+		SELECT CATEGORY_CODE
+			, CATEGORY_NAME
+		FROM SHOPPING_GOODS_CATEGORY
+		ORDER BY CATEGORY_CODE
+	</select>
+	
+	<!-- 쿼리실행 시 string 하나의 결과값이나 int 하나의 결과값이면 resultType 사용 -->
+	<select id="getMaxId" resultType="int">
+		SELECT NVL(MAX(GOODS_ID) + 1, 1)
+		FROM SHOPPING_GOODS
+	</select>
+
+	<insert id="insertGoods">
+		INSERT INTO SHOPPING_GOODS (
+			GOODS_ID
+			, GOODS_NAME
+			, CATEGORY_CODE
+			, GOODS_WRITER
+			, GOODS_PRICE
+			, GOODS_POINT
+			, GOODS_DELIVERY_PRICE
+			, GOODS_CONTENT
+		) VALUES (
+			#{goodsId}
+			, #{goodsName}
+			, #{categoryCode}
+			, #{goodsWriter}
+			, #{goodsPrice}
+			, #{goodsPrice} * 0.1
+			, #{goodsDeliveryPrice}
+			, #{goodsContent}
+		)
+	</insert>
+	
+	<insert id="insertImage">
+		INSERT ALL
+		<foreach collection="imageList" item="image">
+			INTO SHOPPING_IMAGE (
+				IMAGE_ID
+				, GOODS_ID
+				, FILE_NAME
+				, MEMBER_ID
+			) VALUES (
+				#{image.imageId}
+				, #{image.goodsId}
+				, #{image.fileName}
+				, #{image.memberId}
+			)
+		</foreach>
+		SELECT * FROM DUAL
+	</insert>
+	
+	<select id="selectItemList" resultMap="goods">
+		SELECT GOODS_NAME		
+       		, GOODS_PRICE
+        	, CATEGORY_CODE
+        	, I.FILE_NAME
+        	, G.GOODS_ID
+		FROM SHOPPING_GOODS G, SHOPPING_IMAGE I
+		WHERE G.GOODS_ID = I.GOODS_ID
+		AND IMAGE_ID LIKE '%1'
+		<if test="categoryCode != 0">
+		AND CATEGORY_CODE = #{categoryCode}
+		</if>
+	</select>
+	
+	<select id="shopDetail" resultMap="goods">
+		SELECT G.GOODS_ID
+		    , GOODS_NAME
+		    , GOODS_PRICE
+		    , GOODS_DELIVERY_PRICE
+		    , GOODS_CONTENT
+		    , FILE_NAME
+		    , GOODS_POINT
+		FROM SHOPPING_GOODS G, SHOPPING_IMAGE I
+		WHERE G.GOODS_ID = I.GOODS_ID
+		AND IMAGE_ID LIKE '%1' 
+		AND G.GOODS_ID = #{goodsId}
+	</select>
+	
+	<select id="selectGoodsImages" resultMap="image">
+		SELECT FILE_NAME
+		FROM SHOPPING_IMAGE
+		WHERE GOODS_ID = #{goodsId}
+		AND IMAGE_ID NOT LIKE '%1'
+	</select>
+	
+	<insert id="insertBuy">
+		INSERT INTO SHOPPING_BUY (
+			ORDER_NUM
+			, ORDER_ID
+			, MEMBER_ID
+			, MEMBER_NAME
+			, GOODS_ID
+			, GOODS_NAME
+			, ORDER_GOODS_CNT
+			, ORDER_PRICE
+			, MEMBER_TEL1
+			, MEMBER_TEL2
+			, MEMBER_ADDR
+		) VALUES (
+			(SELECT NVL(MAX(ORDER_NUM) + 1, 1) FROM SHOPPING_BUY)
+			, TO_CHAR(SYSDATE, 'YYYYMMDDHH24MISS')||'_'||#{memberId}
+			, #{memberId}
+			, #{memberName}
+			, #{goodsId}
+			, #{goodsName}
+			, #{orderGoodsCnt}
+			, #{orderPrice}
+			, #{memberTel1}
+			, #{memberTel2}
+			, #{memberAddr}
+		)
+	</insert>
+	
+	<select id="selectBuyList"	resultMap="buy">
+		SELECT ORDER_NUM
+			, ORDER_ID
+			, MEMBER_ID
+			, BUY_DATE
+			, GOODS_NAME
+			, ORDER_PRICE
+			, IS_CONFIRM
+		FROM SHOPPING_BUY
+		WHERE TO_CHAR(BUY_DATE, 'YYYY-MM-DD') &lt;= #{toDate}
+		AND TO_CHAR(BUY_DATE, 'YYYY-MM-DD') &gt;= #{fromDate}
+		<if test="searchValue != null and searchValue != ''">
+		AND UPPER(${searchKeyword}) LIKE UPPER('%'||#{searchValue}||'%') 
+		</if> 
+		<if test='isConfirm == "Y"'>
+		AND IS_CONFIRM = 'Y'
+		</if>
+		ORDER BY BUY_DATE DESC
+	</select>
+	
+	<update id="updateIsConfirm">
+		UPDATE SHOPPING_BUY
+		SET
+		IS_CONFIRM = 'Y'
+		WHERE ORDER_NUM = #{orderNum}
+	</update>
+	
+	 <insert id="insertCart">
+		MERGE INTO SHOPPING_CART
+		USING DUAL
+		ON (GOODS_ID = #{goodsId} AND MEMBER_ID = #{memberId})
+		WHEN MATCHED THEN
+			UPDATE
+			SET
+			GOODS_CNT = GOODS_CNT + #{goodsCnt}
+		WHEN NOT MATCHED THEN
+			INSERT (
+			CART_ID
+			, GOODS_ID
+			, MEMBER_ID
+			, GOODS_CNT
+			) VALUES (
+			'CART'||TO_CHAR(SYSDATE, 'YYYYMMDDHH24MISS')
+			, #{goodsId}
+			, #{memberId}
+			, #{goodsCnt}
+		)
+			
+	</insert> 
+	
+	<!-- <insert id="insertCart">
+		INSERT INTO SHOPPING_CART (
+			CART_ID
+			, GOODS_ID
+			, MEMBER_ID
+			, GOODS_CNT
+		) VALUES (
+			'CART'||TO_CHAR(SYSDATE, 'YYYYMMDDHH24MISS')
+			, #{goodsId}
+			, #{memberId}
+			, #{goodsCnt}
+		)
+	</insert> -->
+	
+	<select id="selectCartList" resultMap="cartList ">
+		SELECT CART_ID 
+		    , I.FILE_NAME
+		    , G.GOODS_NAME
+		    , C.MEMBER_ID
+		    , M.MEMBER_NAME
+		    , C.CREATE_DATE
+		    , G.GOODS_PRICE
+		    , C.GOODS_CNT
+		    , G.GOODS_PRICE * C.GOODS_CNT AS TOTAL_PRICE
+		FROM SHOPPING_CART C, SHOPPING_IMAGE I, SHOPPING_GOODS G, SHOPPING_MEMBER M
+		WHERE C.GOODS_ID = I.GOODS_ID
+		AND I.IMAGE_ID LIKE '%1'
+		AND C.GOODS_ID = G.GOODS_ID
+		AND C.MEMBER_ID = M.MEMBER_ID
+		AND C.MEMBER_ID = #{memberId}
+		AND C.IS_DELETE = 'N'
+	</select>
+	
+	<delete id="deleteCart">
+		DELETE SHOPPING_CART
+		WHERE CART_ID 
+		<foreach collection="cartIdList" item="cartId" open="in (" close=")" separator=",">
+			#{cartId}
+		</foreach>
+	</delete>
+	
+	<update id="deleteMember">
+		UPDATE SHOPPING_MEMBER
+		SET
+		DEL_YN = 'Y'
+		WHERE MEMBER_ID = #{memberId}
+		AND MEMBER_PASSWORD = #{memberPassword}
+	</update>
+	
+	<update id="updateCartCnt">
+		UPDATE SHOPPING_CART
+		SET
+		GOODS_CNT = #{goodsCnt}
+		WHERE CART_ID = #{cartId}
+	</update>
+	
+	<select id="selectCartBuyList" resultMap="cartList">
+		SELECT I.FILE_NAME
+			, G.GOODS_ID
+			, C.CART_ID
+	        , G.GOODS_NAME
+	        , G.GOODS_PRICE
+	        , G.GOODS_POINT
+	        , C.GOODS_CNT
+	        , G.GOODS_DELIVERY_PRICE
+	        , G.GOODS_PRICE * C.GOODS_CNT + G.GOODS_DELIVERY_PRICE AS TOTAL_PRICE
+		FROM SHOPPING_CART C, SHOPPING_IMAGE I, SHOPPING_GOODS G
+		WHERE C.GOODS_ID = I.GOODS_ID
+		AND I.IMAGE_ID LIKE '%1'
+		AND C.GOODS_ID = G.GOODS_ID
+		AND CART_ID IN
+		<foreach collection="cartIdList" item="cartId" open="(" close=")" separator=",">
+			#{cartId}
+		</foreach>
+	</select>
+	
+	<insert id="insertBuyList">
+		INSERT ALL
+		<foreach collection="buyList" item="buyVO" index="index"> <!-- buyVO.getBuyList(); -->
+			INTO SHOPPING_BUY ( 
+				ORDER_NUM
+				, ORDER_ID
+				, MEMBER_ID
+				, MEMBER_NAME
+				, GOODS_ID
+				, GOODS_NAME
+				, ORDER_GOODS_CNT
+				, ORDER_PRICE
+				, MEMBER_TEL1
+				, MEMBER_TEL2
+				, MEMBER_ADDR
+			) VALUES (
+				(SELECT NVL(MAX(ORDER_NUM) + 1, 1) + #{index} FROM SHOPPING_BUY)
+				, TO_CHAR(SYSDATE, 'YYYYMMDDHH24MISS')||'_'||#{buyVO.memberId}
+				, #{buyVO.memberId} <!-- buyVO.getMemberId -->
+				, #{buyVO.memberName}
+				, #{buyVO.goodsId}
+				, #{buyVO.goodsName}
+				, #{buyVO.orderGoodsCnt}
+				, #{buyVO.orderPrice}
+				, #{buyVO.memberTel1}
+				, #{buyVO.memberTel2}
+				, #{buyVO.memberAddr}
+			)
+		</foreach>
+		SELECT * FROM DUAL
+	</insert>
+	
+	<update id="updateIsDelete">
+		UPDATE SHOPPING_CART
+		SET
+		IS_DELETE = 'Y'
+		WHERE CART_ID IN 
+		<foreach collection="cartIdList" item="cartId" open="(" close=")" separator=",">
+			#{cartId}
+		</foreach>
+	</update>
+	
+	<select id="selectSales" resultMap="sales">
+		SELECT TO_CHAR(BUY_DATE, 'MM') AS BUY_MONTH 
+			, SUM(ORDER_PRICE) AS SALES_PER_MONTH 
+		FROM SHOPPING_BUY
+		WHERE TO_CHAR(BUY_DATE, 'YYYY') = #{salesPerYear}
+		GROUP BY TO_CHAR(BUY_DATE, 'MM')
+	</select>
+	
+	<select id="selectSalesListPerMonth" resultMap="sales">
+		SELECT SUBSTR(TO_CHAR(BUY_DATE, 'YYYYMMDD'), -2, 2) AS BUY_DAY
+		    , SUM(ORDER_PRICE) AS SALES_PER_DAY
+		FROM SHOPPING_BUY
+		WHERE TO_CHAR(BUY_DATE, 'YYYYMM') = #{yearMonth}
+		GROUP BY TO_CHAR(BUY_DATE, 'YYYYMMDD')
+		ORDER BY TO_CHAR(BUY_DATE, 'YYYYMMDD')
+	</select>
+	
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
